@@ -4,6 +4,7 @@ from bs4 import BeautifulSoup
 import streamlit as st
 import google.generativeai as genai
 import logging
+import os
 
 # Set up logging
 logging.basicConfig(filename='vulnerability_logs.log', level=logging.INFO, 
@@ -30,11 +31,7 @@ def search_vulnerabilities(software):
         st.error("Failed to fetch data from the NVD website")
         logging.error("Failed to fetch data from NVD for software: " + software)
     return vulnerabilities
-
-def patch_recommendation(vulnerability_summary):
-    with open('api.txt', 'r') as api_file:
-        api_key = api_file.read().strip()
-
+    api_key=os.getenv("GOOGLE_API_KEY")
     genai.configure(api_key=api_key)
     model = genai.GenerativeModel('gemini-pro')
     prompt = "Provide me with steps to fix the vulnerability described as follows: " + vulnerability_summary
