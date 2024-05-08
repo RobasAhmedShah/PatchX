@@ -5,6 +5,9 @@ import streamlit as st
 import google.generativeai as genai
 import logging
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Set up logging
 logging.basicConfig(filename='vulnerability_logs.log', level=logging.INFO, 
@@ -41,7 +44,18 @@ def search_vulnerabilities(software):
     except Exception as e:
         logging.error(f"Failed to generate patch recommendation due to an error: {e}")
         return f"Failed to generate patch recommendation due to an error: {e}"
-
+def patch_recommendation(vulnerability_summary):
+    api_key=os.getenv("GOOGLE_API_KEY")
+    print(api_key)
+    genai.configure(api_key=api_key)
+    model = genai.GenerativeModel('gemini-pro')
+    prompt = "Provide me with steps to fix the vulnerability described as follows: " + vulnerability_summary
+    try:
+        response = model.generate_content(prompt)
+        return response.candidates[0].content.parts[0].text
+    except Exception as e:
+        logging.error(f"Failed to generate patch recommendation due to an error: {e}")
+        return f"Failed to generate patch recommendation due to an error: {e}"
 def show_logs():
     with open('vulnerability_logs.log', 'r') as log_file:
         log_data = log_file.read()
